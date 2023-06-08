@@ -1,0 +1,55 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+#question-type-container {
+  width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+select {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#questions-container {
+  width: 600px;
+  margin: 20px auto;
+}
+
+.question {
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+button[type="button"] {
+  padding: 5px 10px;
+  background-color: #FF0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+}

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Questions</title>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f1f1f1;
+}
+
+.container {
+  display: flex;
+}
+
+.box {
+  flex: 1;
+  padding: 30px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 10px; /* Added to remove the left side space */
+}
+
+/* Rest of the styles... */
+
+h1 {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+form {
+  margin-top: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 14px;
+}
+
+button[type="button"],
+button[type="submit"] {
+  padding: 5px 10px; /* Adjusted padding for smaller size */
+  border: none;
+  border-radius: 3px; /* Adjusted border-radius for smaller size */
+  cursor: pointer;
+  font-size: 12px; /* Adjusted font-size for smaller size */
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+
+button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+}
+
+button[type="button"] {
+  background-color: #FF0000;
+  color: white;
+}
+
+#questions-container {
+  width: 600px;
+  margin: 20px auto;
+}
+
+.question {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.options {
+  margin-top: 10px;
+}
+
+.options button {
+  margin-top: 10px;
+}
+
+#preview-container {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.question-preview {
+  margin-bottom: 20px;
+}
+
+.question-preview p {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.options-preview {
+  margin-top: 10px;
+}
+
+.option-preview {
+  margin-bottom: 10px;
+}
+
+.option-preview input[type="radio"],
+.option-preview input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box" id="question-type-container">
+      <h1>Create Survey</h1>
+      <form id="question-form" method="post" action="store_question.php">
+        Enter Survey Title<input type="text" name="title"><br><br>
+        <label for="question-type">Select Question Type:</label>
+        <select id="question-type" name="question_type">
+          <option value="radio">radio</option>
+          <option value="checkbox">checkbox</option>
+          <option value="textarea">text</option>
+        </select>
+        <button type="button" onclick="addQuestion()">Create Question</button>
+        <button type="submit">Publish Survey</button>
+		<button type="button" onclick="saveDraft()">Save as Draft</button>
+        <br><br>
+        <div id="questions-container"></div>
+      </form>
+    </div>
+
+    <div class="box" id="preview-container"></div>
+  </div>
+
+  <script>
+    let questionCount = 0;
+
+    function addQuestion() {
+      questionCount++;
+
+      const questionsContainer = document.getElementById('questions-container');
+
+      const questionContainer = document.createElement('div');
+      questionContainer.classList.add('question');
+
+      const questionLabel = document.createElement('label');
+      questionLabel.textContent = `Question ${questionCount}:`;
+
+      const questionInput = document.createElement('input');
+      questionInput.setAttribute('type', 'text');
+      questionInput.setAttribute('name', `question[${questionCount}]`);
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove';
+      removeButton.setAttribute('type', 'button');
+      removeButton.addEventListener('click', () => {
+        questionContainer.remove();
+        updatePreview();
+      });
+
+      questionContainer.appendChild(questionLabel);
+      questionContainer.appendChild(questionInput);
+      questionContainer.appendChild(removeButton);
+
+      const questionTypeSelect = document.getElementById('question-type');
+      const questionType = questionTypeSelect.value;
+
+      questionContainer.innerHTML += `<input type="hidden" name="question_type[${questionCount}]" value="${questionType}">`;
+
+      if (questionType === 'radio' || questionType === 'checkbox') {
+        const optionsContainer = document.createElement('div');
+        optionsContainer.classList.add('options');
+
+        const addOptionButton = document.createElement('button');
+        addOptionButton.textContent = 'Add Option';
+        addOptionButton.setAttribute('type', 'button');
+        addOptionButton.addEventListener('click', () => {
+          createOption(optionsContainer, questionCount);
+          updatePreview();
+        });
+
+        questionContainer.appendChild(optionsContainer);
+        questionContainer.appendChild(addOptionButton);
+      }
+
+      questionsContainer.appendChild(questionContainer);
+      updatePreview();
+    }
+
+    function createOption(optionsContainer, questionCount) {
+      const optionContainer = document.createElement('div');
+      optionContainer.classList.add('option');
+
+      const optionInput = document.createElement('input');
+      optionInput.setAttribute('type', 'text');
+      optionInput.setAttribute('name', `options[${questionCount}][]`);
+
+      const removeOptionButton = document.createElement('button');
+      removeOptionButton.textContent = 'Remove';
+      removeOptionButton.setAttribute('type', 'button');
+      removeOptionButton.addEventListener('click', () => {
+        optionContainer.remove();
+        updatePreview();
+      });
+
+      optionContainer.appendChild(optionInput);
+      optionContainer.appendChild(removeOptionButton);
+
+      optionsContainer.appendChild(optionContainer);
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const previewContainer = document.getElementById('preview-container');
+      const questionsContainer = document.getElementById('questions-container');
+
+      previewContainer.innerHTML = '';
+
+      for (let i = 0; i < questionsContainer.children.length; i++) {
+        const question = questionsContainer.children[i];
+        const questionText = question.querySelector('input[type="text"]').value;
+        const questionType = question.querySelector('input[type="hidden"]').value;
+        const options = Array.from(question.querySelectorAll('.option input[type="text"]')).map(option => option.value);
+
+        const questionPreview = document.createElement('div');
+        questionPreview.classList.add('question-preview');
+
+        const questionTextPreview = document.createElement('p');
+        questionTextPreview.textContent = `Question ${i + 1}: ${questionText}`;
+
+        const questionTypePreview = document.createElement('p');
+        questionTypePreview.textContent = `Type: ${questionType}`;
+
+        questionPreview.appendChild(questionTextPreview);
+        questionPreview.appendChild(questionTypePreview);
+
+        if (questionType === 'radio' || questionType === 'checkbox') {
+          const optionsPreview = document.createElement('div');
+          optionsPreview.classList.add('options-preview');
+
+          for (let j = 0; j < options.length; j++) {
+            const optionPreview = document.createElement('div');
+            optionPreview.classList.add('option-preview');
+
+            const input = document.createElement('input');
+            input.setAttribute('type', questionType);
+            input.setAttribute('name', `question_${i}`);
+            input.setAttribute('value', options[j]);
+
+            const label = document.createElement('label');
+            label.textContent = options[j];
+            label.insertBefore(input, label.firstChild);
+
+            optionPreview.appendChild(label);
+            optionsPreview.appendChild(optionPreview);
+          }
+
+          questionPreview.appendChild(optionsPreview);
+        }
+
+        previewContainer.appendChild(questionPreview);
+      }
+    }
+	function saveDraft() {
+      const questionForm = document.getElementById('question-form');
+      questionForm.action = 'save_draft.php';
+      questionForm.submit();
+    }
+  </script>
+</body>
+</html>
